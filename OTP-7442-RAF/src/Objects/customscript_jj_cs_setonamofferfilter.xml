@@ -1,0 +1,10 @@
+<clientscript scriptid="customscript_jj_cs_setonamofferfilter">
+  <description></description>
+  <isinactive>F</isinactive>
+  <name>JJ CS SET Onam Offers Filter</name>
+  <notifyadmins>F</notifyadmins>
+  <notifyemails></notifyemails>
+  <notifyowner>T</notifyowner>
+  <notifyuser>F</notifyuser>
+  <scriptfile>[/SuiteScripts/JobinandJismi/OTP-7431 Scripting Training/JJ CS Set SubList for Onam Offers.js]</scriptfile>
+</clientscript>
