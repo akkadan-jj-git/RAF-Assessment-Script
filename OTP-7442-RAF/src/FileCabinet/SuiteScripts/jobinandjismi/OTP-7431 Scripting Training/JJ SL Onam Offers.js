@@ -22,7 +22,7 @@ define(['N/ui/serverWidget', 'N/email', 'N/record', 'N/search'],
                     let form = serverWidget.createForm({
                         title: 'Selected Customers for Onam Offer'
                     });
-                    form.clientScriptFileId = 3331;
+                    form.clientScriptFileId = 3336;
                     let fieldGroup = form.addFieldGroup({
                         id: 'custpage_filtersection',
                         label: 'Filters'
@@ -48,6 +48,11 @@ define(['N/ui/serverWidget', 'N/email', 'N/record', 'N/search'],
                         type: serverWidget.SublistType.LIST
                     });
     
+                    subList.addField({
+                        id: 'custpage_id',
+                        type: serverWidget.FieldType.TEXT,
+                        label: 'Customer Id'
+                    });
                     subList.addField({
                         id: 'custpage_name',
                         type: serverWidget.FieldType.TEXT,
@@ -92,7 +97,7 @@ define(['N/ui/serverWidget', 'N/email', 'N/record', 'N/search'],
                         filter.push('AND', ['subsidiary', 'anyof', sub]);
                     }
                     if(name){
-                        filter.push('AND', ['name', 'anyof', name]);
+                        filter.push('AND', ['customermain.internalid', 'anyof', name]);
                     }
                     log.debug('Filters', filter);
     
@@ -123,12 +128,18 @@ define(['N/ui/serverWidget', 'N/email', 'N/record', 'N/search'],
                     });
                     log.debug('Count', searchResults.length);
                     for(let i = 0; i < searchResults.length; i++){
+                        
+                        subList.setSublistValue({
+                            id: 'custpage_id',
+                            line: i,
+                            value: searchResults[i].getValue({ name: 'entity', summary: 'GROUP' })
+                        });
                         subList.setSublistValue({
                             id: 'custpage_name',
                             line: i,
                             value: searchResults[i].getText({ name: 'entity', summary: 'GROUP' })
                         });
-                        // log.debug(searchResults[i].getText({ name: 'entity', summary: 'GROUP'}));
+                        // log.debug(searchResults[i].getValue({ name: 'entity', summary: 'GROUP'}));
                         subList.setSublistValue({
                             id: 'custpage_email',
                             line: i,
@@ -141,6 +152,57 @@ define(['N/ui/serverWidget', 'N/email', 'N/record', 'N/search'],
                         });
                     }
                     scriptContext.response.writePage(form);
+                }
+                else{
+                    let customerEmail, name;
+                    let request = scriptContext.request;
+                    let subListId = 'custpage_list1';
+                    let lineCount = request.getLineCount({
+                        group: 'custpage_list1'
+                    });
+                    let response;
+                    for(let i = 0; i < lineCount; i++){
+                        let isChecked = request.getSublistValue({
+                            group: subListId,
+                            line: i,
+                            name: 'custpage_selected'
+                        });
+                        if(isChecked === 'T'){
+                            customerEmail = request.getSublistValue({
+                                group: subListId,
+                                line: i,
+                                name: 'custpage_email'
+                            });
+                            log.debug('Email fetched', customerEmail);
+                            name = request.getSublistValue({
+                                group: subListId,
+                                line: i,
+                                name: 'custpage_name'
+                            });
+                            log.debug('Customer Name', name);
+                            cid = request.getSublistValue({
+                                group: subListId,
+                                line: i,
+                                name: 'custpage_id'
+                            });
+                            log.debug('Customer Id', cid);
+                            if(customerEmail !== "- None -"){
+                                email.send({
+                                    author: -5,
+                                    recipients: cid,
+                                    subject: 'Onam Special Offers specially for you!!!!',
+                                    body: 'Dear ' + name + ', \n Wishing you and your family a harvest of love, togetherness, and prosperity this Onam. Welcome to the "Onam Special Sale" in our company for which you are an eligible customer.\n\nThank You.'
+                                });
+                                response += 'Email sent to' + customerEmail + '\n';
+                            }
+                            else{
+                                response += 'Email not sent to ' + name + ', since no email id has been assigned to the customer record.\n';
+                            }
+                            
+                        }
+                    }
+                    response += '\n\n<< Go back to the previous page <<'
+                    scriptContext.response.write(response);
                 }
             }catch(e){
                 log.debug("Error", e.stack);

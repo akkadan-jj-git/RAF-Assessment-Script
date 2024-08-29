@@ -40,8 +40,8 @@ function(url) {
         let name = rec.getValue({fieldId: 'custpage_customer'}) || '';
         if(scriptContext.fieldId === 'custpage_subsidiary' || scriptContext.fieldId === 'custpage_customer'){
             document.location = url.resolveScript({
-                deploymentId: 'customdeploy_jj_sl_onameofferspage',
-                scriptId: 'customscript_jj_sl_onameofferspage',
+                deploymentId: 'customdeploy_jj_sl_onamofferspage',
+                scriptId: 'customscript_jj_sl_onamofferspage',
                 params: {
                     subsidiaryValue: subsidiary || '',
                     customerName: name || ''
